@@ -8,6 +8,7 @@ module mdtang_top (
     input clk_z80,                  // 1/2 clk_sys
 
 	input [11:0] joy_btns,          // snes layout: R L X A RT LT DN UP START SELECT Y B, active high
+    input [11:0] joy2_btns,
 
     input [2:0] loading,            // 0: gba on, 1: loading rom, 2: loading cartram, 3: set up flash backup
     input [7:0] loader_do,
@@ -35,6 +36,11 @@ module mdtang_top (
     input ds_miso,
     output ds_mosi,
     output ds_cs,
+    output ds2_clk,
+    input ds2_miso,
+    output ds2_mosi,
+    output ds2_cs,
+
 
     // SDRAM
     output O_sdram_clk,
@@ -85,7 +91,7 @@ pll_74 pll74(.clkin(clk27), .clkout0(hclk), .clkout1(hclk5));
 wire [2:0]  loading;
 wire        loader_do_valid;
 wire [7:0]  loader_do;
-wire [11:0] joy_btns;
+wire [11:0] joy_btns, joy2_btns;
 `endif
 
 localparam FREQ = 53_750_000;
@@ -116,6 +122,7 @@ wire [15:0] rom_data, rom_data2;
 wire rom_req, rom_ack, rom_req2, rom_ack2;
 
 wire [11:0] joy1 = btn_snes2md(joy_btns);
+wire [11:0] joy2 = btn_snes2md(joy2_btns);
 
 // MegaDrive system -------------------------------------------------------------------
 system megadrive (
@@ -127,7 +134,7 @@ system megadrive (
     .BRAM_A(), .BRAM_DI(), .BRAM_DO(), .BRAM_WE(), .BRAM_CHANGE(),
     .RED(red), .GREEN(green), .BLUE(blue), .VS(), .HS(), .HBL(hblank), .VBL(vblank), .CE_PIX(ce_pix), 
     .BORDER('0), .CRAM_DOTS('0), .INTERLACE(), .FIELD(), .RESOLUTION(resolution),
-    .J3BUT('0), .JOY_1(joy1), .JOY_2(), .JOY_3(), .JOY_4(), .JOY_5(), .MULTITAP('0),
+    .J3BUT('0), .JOY_1(joy1), .JOY_2(joy2), .JOY_3(), .JOY_4(), .JOY_5(), .MULTITAP('0),
     .MOUSE('0), .MOUSE_OPT('0), .GUN_OPT('0), .GUN_TYPE('0), .GUN_SENSOR('0), .GUN_A('0),
     .GUN_B('0), .GUN_C('0), .GUN_START('0),
     .SERJOYSTICK_IN('0), .SERJOYSTICK_OUT(), .SER_OPT('0),
@@ -227,7 +234,7 @@ iosys #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
     .clk(clk_sys), .hclk(hclk), .resetn(~reset),
 
     .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),
-    .joy1(joy_btns), .joy2(12'b0),
+    .joy1(joy_btns), .joy2(joy2_btns),
 
     .rom_loading(loading), .rom_do(loader_do), .rom_do_valid(loader_do_valid), 
     .ram_busy(sdram_busy),
@@ -247,14 +254,18 @@ iosys #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
 );
 
 // Gamepads ------------------------------------------------------------------------------
-wire [7:0] ds_do0;      // L D R U St R3 L3 Se, low active
-wire [7:0] ds_do1;      // □ X O △ R1 L1 R2 L2
-
 dualshock_controller #(.FREQ(FREQ)) ds (
     .clk(clk_sys), .I_RSTn(~reset), 
     .O_psCLK(ds_clk), .O_psSEL(ds_cs), .O_psTXD(ds_mosi), .I_psRXD(ds_miso),
-    .O_RXD_1(ds_do0), .O_RXD_2(ds_do1), .O_RXD_3(), .O_RXD_4(), .O_RXD_5(), .O_RXD_6(),
+    .O_RXD_1(), .O_RXD_2(), .O_RXD_3(), .O_RXD_4(), .O_RXD_5(), .O_RXD_6(),
     .snes_btns(joy_btns)
+);
+
+dualshock_controller #(.FREQ(FREQ)) ds2 (
+    .clk(clk_sys), .I_RSTn(~reset), 
+    .O_psCLK(ds2_clk), .O_psSEL(ds2_cs), .O_psTXD(ds2_mosi), .I_psRXD(ds2_miso),
+    .O_RXD_1(), .O_RXD_2(), .O_RXD_3(), .O_RXD_4(), .O_RXD_5(), .O_RXD_6(),
+    .snes_btns(joy2_btns)
 );
 
 // HDMI output ---------------------------------------------------------------------------

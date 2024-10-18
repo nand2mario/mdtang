@@ -23,7 +23,7 @@ Then follow these steps to install the core (for detailed instructions, for now 
 
 4. Again using the Gowin programmer, program `mdtang_m138k.fs` or `mdtang_m138kpro.fs` to on-board flash at starting address 0x000000.
 
-Now the core should be ready. Just load roms (`.bin`) on the SD card and enjoy.
+Now the core should be ready. Just load roms (`.bin`) on the SD card and enjoy. It supports two DS2 controllers acting as 3 button Sega gamepads (square button for A, X for B, circle button for C).
 
 ## Acknowledgements
 * [Genesis-MiSTer core](https://github.com/MiSTer-devel/Genesis_MiSTer)
