@@ -1,7 +1,7 @@
 
 # MDTang - MegaDrive/Genesis for Sipeed Tang FPGA boards
 
-<img src='doc/gbatang0.1.jpg' width=300 />
+<img src='doc/mdtang-0.1.jpg' width="300" />
 
 This is a port of the [Genesis-MiSTer](https://github.com/MiSTer-devel/Genesis_MiSTer) core to Sipeed FPGA boards (Tang Mega 138K, Mega 138K Pro and the upcoming TangConsole 60K). It is the latest addition after [NESTang](https://github.com/nand2mario/nestang), [SNESTang](https://github.com/nand2mario/snestang) and [GBATang](https://github.com/nand2mario/gbatang).
 
