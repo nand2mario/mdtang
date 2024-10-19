@@ -1,9 +1,9 @@
 // Framebuffer to HDMI
 // nand2mario, 2024.10
 //
-// This module takes a RGB pixel input, buffers the video in a BRAM-backed framebuffer, 
+// This module takes Genesis RGB pixel input, buffers the video in a BRAM-backed framebuffer, 
 // then upscales and output the video in 720p HDMI format.
-
+// The video aspect ratio is 4:3, with the video centered on the screen.
 module framebuffer #(
     parameter WIDTH = 320,          // max frame width (<=1280)
     parameter HEIGHT = 240,         // max frame height (<=720)
@@ -107,68 +107,44 @@ reg [$clog2(HEIGHT)-1:0] yy /* xsynthesis syn_keep=1 */;
 reg [10:0] xcnt             /* xsynthesis syn_keep=1 */;
 reg [10:0] ycnt             /* xsynthesis syn_keep=1 */;                  // fractional scaling counters
 reg [9:0] cy_r;
-reg [10:0] width_scaled;    // scaled-up width
-reg [10:0] xstart, xstop;          
-reg [10:0] w;               // width and height of frame or overlay
-reg [9:0] h;                   
 assign mem_portB_addr = yy * WIDTH + xx;
 assign overlay_x = xx;
 assign overlay_y = yy;
-
-always @(posedge clk) begin
-    if (overlay) begin
-        w <= 256; h <= 224;
-    end else begin
-        w <= width; h <= height;
-    end
-end
-
-// hack to get the scaled-up width of the frame
-always @(posedge clk) begin
-    if (w == 320 && h == 240) begin
-        width_scaled <= 960;  // 320 * 720 / 240;
-    end else if (w == 256 && h == 224) begin
-        width_scaled <= 823;  // 256 * 720 / 224;
-    end else if (w == 256 && h == 240) begin
-        width_scaled <= 768;  // 256 * 720 / 240;
-    end else if (w == 320 && h == 224) begin
-        width_scaled <= 1028; // 320 * 720 / 224;
-    end else begin
-        width_scaled <= 960;  // 320 * 720 / 240;
-    end
-end
+localparam XSTART = (1280 - 960) / 2;   // 960:720 = 4:3
+localparam XSTOP = (1280 + 960) / 2;
 
 // address calculation
 // Assume the video occupies fully on the Y direction, we are upscaling the video by `720/height`.
 // xcnt and ycnt are fractional scaling counters.
 always @(posedge clk_pixel) begin
     reg active_t;
-
-    xstart <= 1280/2 - width_scaled/2 - 1;
-    xstop <= 1280/2 + width_scaled/2 - 1;
+    reg [10:0] xcnt_next;
+    reg [10:0] ycnt_next;
+    xcnt_next = xcnt + (overlay ? 256 : width);
+    ycnt_next = ycnt + (overlay ? 224 : height);
 
     active_t = 0;
-    if (cx == xstart) begin
+    if (cx == XSTART - 1) begin
         active_t = 1;
         active <= 1;
-    end else if (cx == xstop) begin
+    end else if (cx == XSTOP - 1) begin
         active_t = 0;
         active <= 0;
     end
 
     if (active_t | active) begin        // increment xx
-        xcnt <= xcnt + h;
-        if (xcnt + h >= 720) begin
-            xcnt <= xcnt + h - 720;
+        xcnt <= xcnt_next;
+        if (xcnt_next >= 960) begin
+            xcnt <= xcnt_next - 960;
             xx <= xx + 1;
         end
     end
 
     cy_r <= cy;
     if (cy[0] != cy_r[0]) begin         // increment yy at new lines
-        ycnt <= ycnt + h;
-        if (ycnt + h >= 720) begin
-            ycnt <= ycnt + h - 720;
+        ycnt <= ycnt_next;
+        if (ycnt_next >= 720) begin
+            ycnt <= ycnt_next - 720;
             yy <= yy + 1;
         end
     end
