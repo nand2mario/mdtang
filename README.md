@@ -25,5 +25,9 @@ Then follow these steps to install the core (for detailed instructions, for now 
 
 Now the core should be ready. Just load roms (`.bin`) on the SD card and enjoy. It supports two DS2 controllers acting as 3 button Sega gamepads (square button for A, X for B, circle button for C).
 
+## Documentation
+
+* [Blast Processing on the Tang FPGA boards](https://nand2mario.github.io/posts/2024/mdtang/)
+
 ## Acknowledgements
 * [Genesis-MiSTer core](https://github.com/MiSTer-devel/Genesis_MiSTer)
