@@ -160,9 +160,9 @@ module vdp(
    reg              PENDING /* xsynthesis syn_keep=1 */;
    reg [5:0]        CODE;
    
-   reg [16:0]       FIFO_ADDR[0:3];
-   reg [15:0]       FIFO_DATA[0:3];
-   reg [3:0]        FIFO_CODE[0:3];
+   reg [16:0]       FIFO_ADDR[0:3] /* synthesis syn_ramstyle="distributed_ram" */;
+   reg [15:0]       FIFO_DATA[0:3] /* synthesis syn_ramstyle="distributed_ram" */;
+   reg [3:0]        FIFO_CODE[0:3] /* synthesis syn_ramstyle="distributed_ram" */;
    reg [1:0]        FIFO_DELAY[0:3];
    reg [1:0]        FIFO_WR_POS;
    reg [1:0]        FIFO_RD_POS;

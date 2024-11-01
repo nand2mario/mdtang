@@ -1181,8 +1181,8 @@ localparam REG_SSP = 16;
 localparam REG_DT = 17;
 
 	// Register file
-	reg [15:0] regs68L[ 18];
-	reg [15:0] regs68H[ 18];
+	reg [15:0] regs68L[ 18] /* synthesis syn_ramstyle="distributed_ram" */;
+	reg [15:0] regs68H[ 18] /* synthesis syn_ramstyle="distributed_ram" */;
 
 // synthesis translate off
 	/*

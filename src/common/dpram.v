@@ -2,7 +2,8 @@
 module dpram
  #(  parameter ADRW = 8, // address width (therefore total size is 2**ADRW)
      parameter DATW = 8, // data width
-     parameter FILE = "" // initialization hex file, optional
+     parameter FILE = "", // initialization hex file, optional
+     parameter SSRAM = 0
   )( input                 clock    , // clock
      input                 wren_a , // write enable for port A
      input                 wren_b , // write enable for port B
@@ -18,6 +19,7 @@ module dpram
 
     // initialize RAM, with zeros if ZERO or file if FILE.
     integer i;
+
     reg [DATW-1:0] mem [0:MEMD-1]; // memory array
     initial
         if (FILE != "") $readmemh(FILE, mem);

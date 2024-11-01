@@ -8,6 +8,7 @@
         <File path="src/common/dpram.v" type="file.verilog" enable="1"/>
         <File path="src/common/dpram32_block.v" type="file.verilog" enable="1"/>
         <File path="src/common/dpram_block.v" type="file.verilog" enable="1"/>
+        <File path="src/common/ssram.v" type="file.verilog" enable="1"/>
         <File path="src/fx68k/fx68k.sv" type="file.verilog" enable="1"/>
         <File path="src/fx68k/fx68kAlu.sv" type="file.verilog" enable="1"/>
         <File path="src/fx68k/uaddrPla.sv" type="file.verilog" enable="1"/>
@@ -77,9 +78,9 @@
         <File path="src/jt89/jt89_noise.v" type="file.verilog" enable="1"/>
         <File path="src/jt89/jt89_tone.v" type="file.verilog" enable="1"/>
         <File path="src/jt89/jt89_vol.v" type="file.verilog" enable="1"/>
-        <File path="src/m138k/pll.v" type="file.verilog" enable="1"/>
-        <File path="src/m138k/pll_27.v" type="file.verilog" enable="1"/>
-        <File path="src/m138k/pll_74.v" type="file.verilog" enable="1"/>
+        <File path="src/m60k/pll.v" type="file.verilog" enable="1"/>
+        <File path="src/m60k/pll_27.v" type="file.verilog" enable="1"/>
+        <File path="src/m60k/pll_74.v" type="file.verilog" enable="1"/>
         <File path="src/mdtang_top.sv" type="file.verilog" enable="1"/>
         <File path="src/memory/rv_sdram_adapter.v" type="file.verilog" enable="1"/>
         <File path="src/memory/sdram.v" type="file.verilog" enable="1"/>

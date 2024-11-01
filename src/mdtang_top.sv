@@ -117,9 +117,10 @@ wire [3:0] red   /* xsynthesis syn_keep=1 */,
 wire [15:0] audio_left, audio_right;
 /* verilator public_off */
 
-wire [24:1] rom_addr, rom_addr2;
-wire [15:0] rom_data, rom_data2;
-wire rom_req, rom_ack, rom_req2, rom_ack2;
+wire [24:1] mem_addr;
+wire [15:0] mem_data, mem_wdata;
+wire [1:0] mem_be;
+wire mem_req, mem_ack, mem_we;
 
 wire [11:0] joy1 = btn_snes2md(joy_btns);
 wire [11:0] joy2 = btn_snes2md(joy2_btns);
@@ -138,9 +139,8 @@ system megadrive (
     .MOUSE('0), .MOUSE_OPT('0), .GUN_OPT('0), .GUN_TYPE('0), .GUN_SENSOR('0), .GUN_A('0),
     .GUN_B('0), .GUN_C('0), .GUN_START('0),
     .SERJOYSTICK_IN('0), .SERJOYSTICK_OUT(), .SER_OPT('0),
-    .ROM_ADDR(rom_addr), .ROM_DATA(rom_data), .ROM_WDATA(), .ROM_WE(), .ROM_BE(),
-    .ROM_REQ(rom_req), .ROM_ACK(rom_ack), .ROMSZ(loader_addr[21:1]),
-    .ROM_ADDR2(rom_addr2), .ROM_DATA2(rom_data2), .ROM_REQ2(rom_req2), .ROM_ACK2(rom_ack2),
+    .MEM_ADDR(mem_addr), .MEM_DATA(mem_data), .MEM_WDATA(mem_wdata), .MEM_WE(mem_we), .MEM_BE(mem_be),
+    .MEM_REQ(mem_req), .MEM_ACK(mem_ack), .ROMSZ(loader_addr[21:1]),
     .EN_HIFI_PCM('0), .LADDER('0), .OBJ_LIMIT_HIGH('0), .TRANSP_DETECT(),
     .PAUSE_EN('0), .BGA_EN('1), .BGB_EN('1), .SPR_EN('1), .DBG_M68K_A(), .DBG_VBUS_A()
 );
@@ -170,8 +170,8 @@ end
 
 sdram_sim u_sdram (
     .clk(clk_sys), .resetn(1'b1), .busy(sdram_busy),
-    .addr0(rom_addr), .req0(rom_req), .ack0(rom_ack), .wr0('0), .be0(2'b11),
-	.din0('0), .dout0(rom_data), 
+    .addr0(mem_addr), .req0(mem_req), .ack0(mem_ack), .wr0(mem_we), .be0(mem_be),
+	.din0(mem_wdata), .dout0(mem_data),
     .addr1(loader_addr[21:1]), .req1(loader_req), .ack1(), .wr1('1), .be1(loader_addr[0] ? 2'b01 : 2'b10),    // big-endian
 	.din1({2{loader_do}}), .dout1(), 
     .addr2(), .req2(), .ack2(), .wr2(), .be2(),
@@ -197,15 +197,20 @@ wire        rv_mem_req      /* xsynthesis syn_keep=1 */;
 wire        rv_mem_ack      /* xsynthesis syn_keep=1 */;
 wire        rv_mem_we       /* xsynthesis syn_keep=1 */;
 
+// SDRAM layout: total 32MB
+// 0000000 - 07FFFFF: cartridge ROM (max Genesis game is 5MB, Super Street Fighter II: The New Challengers)
+// 0800000 - 080FFFF: 68K RAM       (64KB)
+// 0820000 - 083FFFF: SRAM          (128KB)
+// 1000000 - 10FFFFF: Risc-V memory (1MB)
 sdram #(.FREQ(FREQ)) u_sdram (
     .clk(clk_sys), .resetn(1'b1), .refresh_allowed(1'b1), .busy(sdram_busy),
-    .addr0(rom_addr), .req0(rom_req), .ack0(rom_ack), .wr0('0), .be0(2'b11),
-	.din0('0), .dout0(rom_data),
+    .addr0(mem_addr), .req0(mem_req), .ack0(mem_ack), .wr0(mem_we), .be0(mem_be),
+	.din0(mem_wdata), .dout0(mem_data),
 
     .addr1(loader_addr[21:1]), .req1(loader_req), .ack1(), .wr1('1), .be1(loader_addr[0] ? 2'b01 : 2'b10),    // big-endian
 	.din1({2{loader_do}}), .dout1(), 
 
-    .addr2({2'b01, rv_mem_addr}), .req2(rv_mem_req), .ack2(rv_mem_ack), .wr2(rv_mem_we), .be2(rv_mem_ds),
+    .addr2({2'b10, rv_mem_addr}), .req2(rv_mem_req), .ack2(rv_mem_ack), .wr2(rv_mem_we), .be2(rv_mem_ds),
 	.din2(rv_mem_din), .dout2(rv_mem_dout),
 
     .SDRAM_DQ(IO_sdram_dq), .SDRAM_A(O_sdram_addr), .SDRAM_BA(O_sdram_ba),      

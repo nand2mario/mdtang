@@ -119,18 +119,18 @@ module system
 	input   [1:0] SER_OPT,
 
 	input  [24:1] ROMSZ,
-	output [24:1] ROM_ADDR,
-	input  [15:0] ROM_DATA,
-	output [15:0] ROM_WDATA,
-	output reg    ROM_WE,		// only for Game no Kanzume Otokuyou
-	output  [1:0] ROM_BE,
-	output reg    ROM_REQ,
-	input         ROM_ACK,
+	output reg [24:1] MEM_ADDR,
+	input  [15:0] MEM_DATA,
+	output [15:0] MEM_WDATA,
+	output reg    MEM_WE,		// only for Game no Kanzume Otokuyou
+	output  [1:0] MEM_BE,
+	output reg    MEM_REQ,
+	input         MEM_ACK,
 
-	output [24:1] ROM_ADDR2,
-	input  [15:0] ROM_DATA2,
-	output        ROM_REQ2,
-	input         ROM_ACK2, 
+	// output [24:1] MEM_ADDR2,
+	// input  [15:0] MEM_DATA2,
+	// output        MEM_REQ2,
+	// input         MEM_ACK2, 
 	
 	input         EN_HIFI_PCM,
 	input         LADDER,
@@ -667,61 +667,61 @@ multitap multitap
 // ROM
 //-----------------------------------------------------------------------
 
-assign ROM_ADDR = BANK_ROM ? {BANK_REG[MBUS_A[21:19]], MBUS_A[18:1]} : MBUS_A;
-assign ROM_BE = ~{MBUS_UDS_N, MBUS_LDS_N};
-assign ROM_WDATA = MBUS_DO;
+// assign MEM_ADDR = BANK_ROM ? {BANK_REG[MBUS_A[21:19]], MBUS_A[18:1]} : MBUS_A;
+assign MEM_BE = ~{MBUS_UDS_N, MBUS_LDS_N};
+assign MEM_WDATA = MBUS_DO;
 
 //-----------------------------------------------------------------------
 // 64KB SRAM / 128KB SVP DRAM
 //-----------------------------------------------------------------------
-reg SRAM_SEL;
-reg [15:0] sram_addr;
-reg [7:0] sram_di;
-reg sram_wren;
-wire [7:0] sram_q_l, sram_q_u;
-assign sram_q = sram_addr[0] ? sram_q_u : sram_q_l;
+// reg SRAM_SEL;
+// reg [15:0] sram_addr;
+// reg [7:0] sram_di;
+// reg sram_wren;
+// wire [7:0] sram_q_l, sram_q_u;
+// assign sram_q = sram_addr[0] ? sram_q_u : sram_q_l;
 
-always_comb begin
-	if (PIER_QUIRK) begin
-		sram_addr = {4'b0000, m95_addr};
-		sram_di = m95_di;
-		sram_wren = m95_rnw;
-	end else begin
-		sram_addr = MBUS_A[16:1];
-		sram_di = MBUS_DO[7:0];
-		sram_wren = SRAM_SEL & ~MBUS_RNW;
-	end
-end
+// always_comb begin
+// 	if (PIER_QUIRK) begin
+// 		sram_addr = {4'b0000, m95_addr};
+// 		sram_di = m95_di;
+// 		sram_wren = m95_rnw;
+// 	end else begin
+// 		sram_addr = MBUS_A[16:1];
+// 		sram_di = MBUS_DO[7:0];
+// 		sram_wren = SRAM_SEL & ~MBUS_RNW;
+// 	end
+// end
 
-// nand2mario: dropping SVP, so SRAM is 64K instead of 128K, and use dpram instead of dpram_dif
-dpram #(15) sram_u
-(
-	.clock(MCLK),
-	.address_a(sram_addr[15:1]),
-	.data_a(sram_di),
-	.wren_a(sram_wren),
-	.q_a(sram_q_u),
+// // nand2mario: dropping SVP, so SRAM is 64K instead of 128K, and use dpram instead of dpram_dif
+// dpram #(15) sram_u
+// (
+// 	.clock(MCLK),
+// 	.address_a(sram_addr[15:1]),
+// 	.data_a(sram_di),
+// 	.wren_a(sram_wren),
+// 	.q_a(sram_q_u),
 
-	.address_b(LOADING ? ram_rst_a : BRAM_A),
-	// Initializes SRAM to 0x0 for Sonic 1 Remastered, all other games have SRAM initialized to 0xFF
-	.data_b(LOADING ? (SRAM00_QUIRK ? 8'h00 : 'hFF) : BRAM_DI),
-	.wren_b(BRAM_WE),
-	.q_b(BRAM_DO[15:8])
-);
+// 	.address_b(LOADING ? ram_rst_a : BRAM_A),
+// 	// Initializes SRAM to 0x0 for Sonic 1 Remastered, all other games have SRAM initialized to 0xFF
+// 	.data_b(LOADING ? (SRAM00_QUIRK ? 8'h00 : 'hFF) : BRAM_DI),
+// 	.wren_b(BRAM_WE),
+// 	.q_b(BRAM_DO[15:8])
+// );
 
-dpram #(15) sram_l
-(
-	.clock(MCLK),
-	.address_a(sram_addr[15:1]),
-	.data_a(sram_di),
-	.wren_a(sram_wren),
-	.q_a(sram_q_l),
+// dpram #(15) sram_l
+// (
+// 	.clock(MCLK),
+// 	.address_a(sram_addr[15:1]),
+// 	.data_a(sram_di),
+// 	.wren_a(sram_wren),
+// 	.q_a(sram_q_l),
 
-	.address_b(LOADING ? ram_rst_a : BRAM_A),
-	.data_b(LOADING ? (SRAM00_QUIRK ? 8'h00 : 'hFF) : BRAM_DI),
-	.wren_b(BRAM_WE),
-	.q_b(BRAM_DO[7:0])
-);
+// 	.address_b(LOADING ? ram_rst_a : BRAM_A),
+// 	.data_b(LOADING ? (SRAM00_QUIRK ? 8'h00 : 'hFF) : BRAM_DI),
+// 	.wren_b(BRAM_WE),
+// 	.q_b(BRAM_DO[7:0])
+// );
 
 // dpram_dif #(17,8,16,16) sram
 // (
@@ -738,8 +738,8 @@ dpram #(15) sram_l
 // 	.q_b(BRAM_DO)
 // );
 
-wire [7:0] sram_q;
-assign BRAM_CHANGE = sram_wren;
+// wire [7:0] sram_q;
+// assign BRAM_CHANGE = sram_wren;
 
 //-----------------------------------------------------------------------
 // EEPROM Handling
@@ -795,10 +795,10 @@ reg SVP_CLKEN;
 // 	.BUS_DTACK_N(SVP_DTACK_N),
 // 	.DMA_ACTIVE(VBUS_SEL),
 
-// 	.ROM_A(ROM_ADDR2),
-// 	.ROM_DI(ROM_DATA2),
-// 	.ROM_REQ(ROM_REQ2),
-// 	.ROM_ACK(ROM_ACK2),
+// 	.ROM_A(MEM_ADDR2),
+// 	.ROM_DI(MEM_DATA2),
+// 	.MEM_REQ(MEM_REQ2),
+// 	.MEM_ACK(MEM_ACK2),
 
 // 	.DRAM_A(SVP_DRAM_A),
 // 	.DRAM_DI(SVP_DRAM_DI),
@@ -810,38 +810,38 @@ reg SVP_CLKEN;
 //-----------------------------------------------------------------------
 // 68K RAM
 //-----------------------------------------------------------------------
-reg RAM_SEL;
+// reg RAM_SEL;
 
-dpram #(15) ram68k_u
-(
-	.clock(MCLK),
-	.address_a(MBUS_A[15:1]),
-	.data_a(MBUS_DO[15:8]),
-	.wren_a(RAM_SEL & ~MBUS_RNW & ~MBUS_UDS_N),
-	.q_a(ram68k_q[15:8]),
+// dpram #(15) ram68k_u
+// (
+// 	.clock(MCLK),
+// 	.address_a(MBUS_A[15:1]),
+// 	.data_a(MBUS_DO[15:8]),
+// 	.wren_a(RAM_SEL & ~MBUS_RNW & ~MBUS_UDS_N),
+// 	.q_a(ram68k_q[15:8]),
 
-	.address_b(ram_rst_a[15:1]),
-	.wren_b(LOADING)
-);
+// 	.address_b(ram_rst_a[15:1]),
+// 	.wren_b(LOADING)
+// );
 
-dpram #(15) ram68k_l
-(
-	.clock(MCLK),
-	.address_a(MBUS_A[15:1]),
-	.data_a(MBUS_DO[7:0]),
-	.wren_a(RAM_SEL & ~MBUS_RNW & ~MBUS_LDS_N),
-	.q_a(ram68k_q[7:0]),
+// dpram #(15) ram68k_l
+// (
+// 	.clock(MCLK),
+// 	.address_a(MBUS_A[15:1]),
+// 	.data_a(MBUS_DO[7:0]),
+// 	.wren_a(RAM_SEL & ~MBUS_RNW & ~MBUS_LDS_N),
+// 	.q_a(ram68k_q[7:0]),
 
-	.address_b(ram_rst_a[15:1]),
-	.wren_b(LOADING)
-);
-wire [15:0] ram68k_q;
+// 	.address_b(ram_rst_a[15:1]),
+// 	.wren_b(LOADING)
+// );
+// wire [15:0] ram68k_q;
 
 //-----------------------------------------------------------------------
 // MBUS Handling
 //-----------------------------------------------------------------------
 
-reg  [3:0] mstate;
+reg  [4:0] mstate;
 reg  [1:0] msrc;
 	
 localparam	MSRC_NONE = 0,
@@ -864,7 +864,8 @@ localparam 	MBUS_IDLE         = 0,
 			MBUS_SVP_READ     = 12,
 			MBUS_REFRESH      = 13,
 			MBUS_FINISH       = 14,
-			MBUS_Z80_PREREAD  = 15; 
+			MBUS_Z80_PREREAD  = 15,
+			MBUS_WAIT_FOR_S4  = 16;
 
 				
 always @(posedge MCLK) begin
@@ -911,8 +912,8 @@ always @(posedge MCLK) begin
 		MBUS_IDLE:
 			begin
 				CTRL_SEL <= 0;
-				SRAM_SEL <= 0;
-				RAM_SEL <= 0;
+				// SRAM_SEL <= 0;
+				// RAM_SEL <= 0;
 				MBUS_RNW <= 1;
 				MBUS_UDS_N <= 1;
 				MBUS_LDS_N <= 1;
@@ -927,7 +928,7 @@ always @(posedge MCLK) begin
 					data <= NO_DATA;
 					MBUS_DO <= M68K_DO;
 					MBUS_RNW <= M68K_RNW;
-					mstate <= MBUS_SELECT;
+					mstate <= MBUS_WAIT_FOR_S4; 
 				end
 				else if (VBUS_SEL && VDP_MBUS_DTACK_N) begin
 					msrc <= MSRC_VDP;
@@ -948,7 +949,15 @@ always @(posedge MCLK) begin
 					cycle_cnt <= 2'd1;
 				end
 			end
-			
+		
+		MBUS_WAIT_FOR_S4:			// nand2mario: datasheet 5.8, "STATE 4: Entering the high clock
+									// period of S4, UDS, LDS, and/or DS is asserted(during a write 
+									// cycle) on the rising edge of the clock."
+									// --> UDS/LDS is delayed one full clock cycle for writes
+									//     So we wait a cycle here.
+			if (M68K_CLKENp)
+				mstate <= MBUS_SELECT;
+
 		MBUS_Z80_PREREAD:
 			begin
 				if (cycle_cnt) begin
@@ -966,7 +975,12 @@ always @(posedge MCLK) begin
 					//ROM: 000000-9FFFFF (A00000-DFFFFF)
 					if (BANK_SRAM && MBUS_A[23:21] == 1) begin
 						// 200000-3FFFFF SRAM overrides ROM when bank is selected
-						SRAM_SEL <= 1;
+						// SRAM_SEL <= 1;
+						MEM_REQ <= ~MEM_ACK;
+						MEM_ADDR <= {8'b0_1000_001, MBUS_A[16:1]};
+						MEM_WE <= ~MBUS_RNW;
+						MBUS_UDS_N <= M68K_UDS_N;
+						MBUS_LDS_N <= M68K_LDS_N;
 						mstate <= MBUS_SRAM_READ;
 					end
 					else if (PIER_QUIRK && ({MBUS_A,1'b0} == 'h0015E6 || {MBUS_A,1'b0} == 'h0015E8)) begin
@@ -982,7 +996,12 @@ always @(posedge MCLK) begin
 						mstate <= MBUS_FINISH;
 					end
 					else if ((SRAM_QUIRK | SRAM00_QUIRK) && {MBUS_A,1'b0} == 'h200000) begin
-						SRAM_SEL <= 1;
+						// SRAM_SEL <= 1;
+						MEM_REQ <= ~MEM_ACK;
+						MEM_ADDR <= {8'b0_1000_001, MBUS_A[16:1]};
+						MEM_WE <= ~MBUS_RNW;
+						MBUS_UDS_N <= M68K_UDS_N;
+						MBUS_LDS_N <= M68K_LDS_N;
 						mstate <= MBUS_SRAM_READ;
 					end
 					else if(SVP_QUIRK && MBUS_A[23:20] == 3) begin
@@ -997,8 +1016,9 @@ always @(posedge MCLK) begin
 					end
 					else if (MBUS_A < ROMSZ) begin
 						if (SVP_QUIRK && msrc == MSRC_VDP) MBUS_A <= MBUS_A - 1'd1;
-						ROM_WE <= 0;
-						ROM_REQ <= ~ROM_ACK;
+						MEM_WE <= 0;
+						MEM_REQ <= ~MEM_ACK;
+						MEM_ADDR <= BANK_ROM ? {BANK_REG[MBUS_A[21:19]], MBUS_A[18:1]} : MBUS_A;
 						mstate <= MBUS_ROM_READ;
 					end
 					else if ((MULTITAP == 4) && ({MBUS_A,1'b0} == 'h3FFFFE || {MBUS_A,1'b0} == 'h38FFFE)) begin
@@ -1007,7 +1027,12 @@ always @(posedge MCLK) begin
 					end
 					else if(MBUS_A[23:21] == 1 && ~&MBUS_A[20:19] && ~NORAM_QUIRK) begin
 						// 200000-37FFFF
-						SRAM_SEL <= 1;
+						// SRAM_SEL <= 1;
+						MEM_REQ <= ~MEM_ACK;
+						MEM_ADDR <= {8'b0_1000_001, MBUS_A[16:1]};
+						MEM_WE <= ~MBUS_RNW;
+						MBUS_UDS_N <= M68K_UDS_N;
+						MBUS_LDS_N <= M68K_LDS_N;
 						mstate <= MBUS_SRAM_READ;
 					end
 					else begin
@@ -1074,7 +1099,12 @@ always @(posedge MCLK) begin
 
 				//RAM: E00000-FFFFFF
 				else if(&MBUS_A[23:21]) begin
-					RAM_SEL <= 1;
+					// RAM_SEL <= 1;
+					MEM_REQ <= ~MEM_ACK;
+					MEM_ADDR <= {9'b0_1000_0000, MBUS_A[15:1]};
+					MEM_WE <= ~MBUS_RNW;
+					MBUS_UDS_N <= M68K_UDS_N;
+					MBUS_LDS_N <= M68K_LDS_N;
 					mstate <= MBUS_RAM_READ;
 				end
 			end
@@ -1123,9 +1153,9 @@ always @(posedge MCLK) begin
 			end
 
 		MBUS_RAM_READ:
-			begin
-				data <= ram68k_q;
-				if(msrc == MSRC_M68K) NO_DATA <= ram68k_q;
+			if (MEM_REQ == MEM_ACK) begin
+				data <= MEM_DATA; // ram68k_q;
+				if(msrc == MSRC_M68K) NO_DATA <= MEM_DATA; // ram68k_q;
 				mstate <= MBUS_FINISH;
 			end
 
@@ -1135,8 +1165,9 @@ always @(posedge MCLK) begin
 				if(M68K_AS_N | (~M68K_UDS_N | ~M68K_LDS_N)) begin
 					MBUS_UDS_N <= M68K_UDS_N;
 					MBUS_LDS_N <= M68K_LDS_N;
-					ROM_WE <= 1;
-					ROM_REQ <= ~ROM_ACK;
+					MEM_WE <= 1;
+					MEM_REQ <= ~MEM_ACK;
+					MEM_ADDR <= BANK_ROM ? {BANK_REG[MBUS_A[21:19]], MBUS_A[18:1]} : MBUS_A;
 					mstate <= MBUS_ROM_READ;
 				end
 
@@ -1144,25 +1175,26 @@ always @(posedge MCLK) begin
 				begin
 					MBUS_UDS_N <= Z80_A[0];
 					MBUS_LDS_N <= ~Z80_A[0];
-					ROM_WE <= 1;
-					ROM_REQ <= ~ROM_ACK;
+					MEM_WE <= 1;
+					MEM_REQ <= ~MEM_ACK;
+					MEM_ADDR <= BANK_ROM ? {BANK_REG[MBUS_A[21:19]], MBUS_A[18:1]} : MBUS_A;
 					mstate <= MBUS_ROM_READ;
 				end
 			endcase
 
 		MBUS_ROM_READ:
-			if (ROM_REQ == ROM_ACK) begin
-				data <= ROM_DATA;
-				if(msrc == MSRC_M68K) NO_DATA <= ROM_DATA;
+			if (MEM_REQ == MEM_ACK) begin
+				data <= MEM_DATA;
+				if(msrc == MSRC_M68K) NO_DATA <= MEM_DATA;
 				if (msrc != MSRC_Z80 || !cycle_cnt)
 					mstate <= MBUS_FINISH;
 			end
 
 		MBUS_SRAM_READ:
-			begin
-				data <= {sram_q,sram_q};
-				if(msrc == MSRC_M68K) NO_DATA <= {sram_q,sram_q};
-				SRAM_SEL <= 0;
+			if (MEM_REQ == MEM_ACK) begin
+				data <= MEM_DATA; // {sram_q,sram_q};
+				if(msrc == MSRC_M68K) NO_DATA <= MEM_DATA; // {sram_q,sram_q};
+				// SRAM_SEL <= 0;
 				mstate <= MBUS_FINISH;
 			end
 

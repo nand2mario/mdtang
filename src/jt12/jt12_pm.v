@@ -35,8 +35,8 @@ reg [9:0] pm_shifted;
 
 wire [2:0] index = lfo_mod[3] ? (~lfo_mod[2:0]) : lfo_mod[2:0];
 
-reg [2:0] lfo_sh1_lut [0:63];
-reg [2:0] lfo_sh2_lut [0:63];
+reg [2:0] lfo_sh1_lut [0:63] /* synthesis syn_ramstyle="distributed_ram" */;
+reg [2:0] lfo_sh2_lut [0:63] /* synthesis syn_ramstyle="distributed_ram" */;
 reg [2:0] lfo_sh1, lfo_sh2;
 
 initial begin

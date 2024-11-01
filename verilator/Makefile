@@ -2,7 +2,8 @@ N=mdtang_top
 D=../src
 SRCS=$D/mdtang_top.sv \
 	 $D/fx68k/verilator/fx68k.sv $D/fx68k/verilator/fx68kAlu.sv $D/fx68k/verilator/uaddrPla.sv \
-	 $D/vdp/vdp.v $D/vdp/vdp_common.v $D/common/dpram_block.v $D/common/dpram.v $D/common/dpram32_block.v \
+	 $D/vdp/vdp.v $D/vdp/vdp_common.v $D/common/dpram_block.v $D/common/dpram.v \
+	 $D/common/ssram.v $D/common/dpram32_block.v \
 	 $D/system.sv $D/memory/sdram_sim.v $D/peripherals/multitap.sv $D/peripherals/gen_io.sv \
 	 $D/peripherals/fourway.v $D/peripherals/lightgun.sv $D/peripherals/teamplayer.sv \
 	 $D/jt89/jt89_mixer.v $D/jt89/jt89_noise.v $D/jt89/jt89_tone.v $D/jt89/jt89_vol.v $D/jt89/jt89.v \
