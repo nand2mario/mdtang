@@ -111,6 +111,7 @@ end
 reg        md_on;
 wire [1:0] resolution;          // {V30, H40}, V30: verticle 240 vs 224, H40: horizontal 320 vs 256
 wire ce_pix, hblank, vblank;
+wire       pause_core;
 wire [3:0] red   /* xsynthesis syn_keep=1 */, 
            green /* xsynthesis syn_keep=1 */, 
            blue  /* xsynthesis syn_keep=1 */;
@@ -142,7 +143,7 @@ system megadrive (
     .MEM_ADDR(mem_addr), .MEM_DATA(mem_data), .MEM_WDATA(mem_wdata), .MEM_WE(mem_we), .MEM_BE(mem_be),
     .MEM_REQ(mem_req), .MEM_ACK(mem_ack), .ROMSZ(loader_addr[21:1]),
     .EN_HIFI_PCM('0), .LADDER('0), .OBJ_LIMIT_HIGH('0), .TRANSP_DETECT(),
-    .PAUSE_EN('0), .BGA_EN('1), .BGB_EN('1), .SPR_EN('1), .DBG_M68K_A(), .DBG_VBUS_A()
+    .PAUSE_EN(pause_core), .BGA_EN('1), .BGB_EN('1), .SPR_EN('1), .DBG_M68K_A(), .DBG_VBUS_A()
 );
 
 
@@ -299,6 +300,7 @@ framebuffer #(
     .width(resolution[0] ? 320 : 256), .height(resolution[1] ? 240 : 224),      // resolution: 0: 256x224, 1: 320x224, 2: 256x240, 3: 320x240
     .audio_left(audio_left), .audio_right(audio_right),
     .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),
+    .pause_core(pause_core),
     
     .tmds_clk_n(tmds_clk_n), .tmds_clk_p(tmds_clk_p),
     .tmds_d_n(tmds_d_n), .tmds_d_p(tmds_d_p)

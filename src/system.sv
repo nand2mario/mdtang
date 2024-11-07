@@ -251,7 +251,7 @@ always @(posedge MCLK) begin
 		PCLKCNT <= PCLKCNT + 1'b1;
 		if (PCLKCNT == 14) begin
 			PCLKCNT <= 0;
-			PSG_CLKEN <= ~PAUSE_EN;
+			PSG_CLKEN <= 1; 	// ~PAUSE_EN;	// nand2mario: do not pause PSG for frame sync
 		end
 
 		M68K_CLKENp <= 0;
@@ -272,7 +272,7 @@ always @(posedge MCLK) begin
 		FCLKCNT <= FCLKCNT + 1'b1;
 		if (FCLKCNT == 6) begin
 			FCLKCNT <= 0;
-			FM_CLKEN <= ~PAUSE_EN;
+			FM_CLKEN <= 1; // ~PAUSE_EN;		// nand2mario: do not pause FM for frame sync
 		end
 	end
 end
