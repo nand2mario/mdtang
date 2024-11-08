@@ -57,10 +57,7 @@ wire [9:0] cy  /* xsynthesis syn_keep=1 */;
 //
 // BRAM frame buffer
 //
-localparam MEM_DEPTH=256*240;
-localparam MEM_ABITS=16;
-
-localparam FB_DEPTH = WIDTH * 16;           // buffer 16 lines
+localparam FB_DEPTH = WIDTH * 32;           // buffer 16 lines
 localparam COLOR_WIDTH = COLOR_BITS * 3;
 localparam FB_AWIDTH = $clog2(FB_DEPTH);
 reg [COLOR_WIDTH-1:0] mem [0:FB_DEPTH-1];
@@ -72,7 +69,7 @@ reg [COLOR_WIDTH-1:0] mem_portB_rdata;
 
 // BRAM port A read/write
 reg ce_pix_r, hblank_r;
-assign mem_portA_addr = y[3:0] * WIDTH + x;
+assign mem_portA_addr = y[4:0] * WIDTH + x;
 always @(posedge clk) begin
     ce_pix_r <= ce_pix;
     if (ce_pix & ~ce_pix_r) 
@@ -80,6 +77,9 @@ always @(posedge clk) begin
 end
 
 // BRAM port B read
+reg [$clog2(WIDTH)-1:0] xx  /* xsynthesis syn_keep=1 */; // scaled-down pixel position
+reg [$clog2(HEIGHT)-1:0] yy /* xsynthesis syn_keep=1 */;
+assign mem_portB_addr = yy[4:0] * WIDTH + xx;
 always @(posedge clk_pixel) begin
     mem_portB_rdata <= mem[mem_portB_addr];
 end
@@ -90,7 +90,7 @@ reg hdmi_first_line;
 always @(posedge clk) begin
     if (~sync_done) begin
         if (~pause_core) begin
-            if (y == 1)                                 // halt on core starting line 1
+            if (y == 0 && x == 1)                             // halt on core starting line 1
                 pause_core <= 1'b1;
         end else if (hdmi_first_line && pause_core) begin     // resume when HDMI start line 0
             pause_core <= 1'b0;
@@ -100,7 +100,7 @@ always @(posedge clk) begin
     if (y == 100) sync_done <= 1'b0;                    // reset sync_done for next frame
 end
 always @(posedge clk_pixel) begin
-    if (cy == 0 && cx >= 256 && cx < 356)
+    if (cy == 0 && cx >= 160)                           // start position of 4:3 frame
         hdmi_first_line <= 1;
     else
         hdmi_first_line <= 0;
@@ -132,12 +132,9 @@ end
 //
 reg [23:0] rgb;             // actual RGB output
 reg active                  /* xsynthesis syn_keep=1 */;
-reg [$clog2(WIDTH)-1:0] xx  /* xsynthesis syn_keep=1 */; // scaled-down pixel position
-reg [$clog2(HEIGHT)-1:0] yy /* xsynthesis syn_keep=1 */;
 reg [10:0] xcnt             /* xsynthesis syn_keep=1 */;
 reg [10:0] ycnt             /* xsynthesis syn_keep=1 */;                  // fractional scaling counters
 reg [9:0] cy_r;
-assign mem_portB_addr = yy[3:0] * WIDTH + xx;
 assign overlay_x = xx;
 assign overlay_y = yy;
 localparam XSTART = (1280 - 960) / 2;   // 960:720 = 4:3
