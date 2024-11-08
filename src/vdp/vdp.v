@@ -2640,7 +2640,7 @@ module vdp(
          BR_N <= 1'b1;
          BGACK_N_REG <= 1'b1;
       
-      end else if (CE) begin
+      end else begin
          
          if (DT_RD_SEL == 1'b0)
             DT_RD_DTACK_N <= 1'b1;
@@ -3225,7 +3225,7 @@ module vdp(
          EXINT_PENDING <= 1'b0;
          HINT_PENDING <= 1'b0;
          VINT_TG68_PENDING <= 1'b0;
-      end else if (CE) begin
+      end else begin
          INTACK_D <= INTACK;
          //acknowledge interrupts serially
          if (INTACK_D == 1'b0 & INTACK) begin
@@ -3250,7 +3250,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          EXINT_FF <= 1'b0;
-      else if (CE) begin
+      else begin
          if (EXINT_PENDING & IE2)
             EXINT_FF <= 1'b1;
          else
@@ -3263,7 +3263,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          HINT_FF <= 1'b0;
-      else if (CE) begin
+      else begin
          if (HINT_PENDING & IE1)
             HINT_FF <= 1'b1;
          else
@@ -3276,7 +3276,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          VINT_TG68_FF <= 1'b0;
-      else if (CE) begin
+      else begin
          if (VINT_TG68_PENDING & IE0)
             VINT_TG68_FF <= 1'b1;
          else
@@ -3289,7 +3289,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          VINT_T80_FF <= 1'b0;
-      else if (CE) begin
+      else begin
          if (VINT_T80_SET)
             VINT_T80_FF <= 1'b1;
          else if (VINT_T80_CLR)
@@ -3300,7 +3300,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          SCOL <= 1'b0;
-      else if (CE) begin
+      else begin
          if (SCOL_SET)
             SCOL <= 1'b1;
          else if (SCOL_CLR)
@@ -3311,7 +3311,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          SOVR <= 1'b0;
-      else if (CE) begin
+      else begin
          if (SOVR_SET)
             SOVR <= 1'b1;
          else if (SOVR_CLR)
