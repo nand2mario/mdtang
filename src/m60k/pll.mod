@@ -7,7 +7,7 @@
 
 -mod_name pll
 -file_name pll
--path Y:/mdtang/src/m60k/
+-path F:/Gowin/dev/mdtang/src/m60k/
 -type PLL_ADV
 -file_type vlg
 -ssc false

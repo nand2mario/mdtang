@@ -210,6 +210,7 @@ reg  Z80_CLKENp, Z80_CLKENn, PSG_CLKEN;
 reg  FM_CLKEN;
 reg clk_z80_cycle;			// 0: CLK_Z80 is high (first half), 1: low (second half)
 always @(posedge MCLK) if (CLK_Z80) clk_z80_cycle <= 1;
+reg pause_reg;				// PAUSE_EN registered on whole m68k cycle
 
 always @(posedge MCLK) begin
 	reg [3:0] FCLKCNT;
@@ -238,13 +239,13 @@ always @(posedge MCLK) begin
 			ZCLKCNT <= 0;
 		if (clk_z80_cycle) 				// make sure Z80_CLKENn is 2 MCLK wide and aligned with CLK_Z80
 			if (ZCLKCNT == 13 | ZCLKCNT == 14) 
-				Z80_CLKENn <= ~PAUSE_EN;
+				Z80_CLKENn <= 1; // ~PAUSE_EN;
 			else
 				Z80_CLKENn <= 0;
 		
 		Z80_CLKENp <= 0;
 		if (ZCLKCNT == 7) begin
-			Z80_CLKENp <= ~PAUSE_EN;
+			Z80_CLKENp <= 1; // ~PAUSE_EN;
 		end
 
 		PSG_CLKEN <= 0;
@@ -259,13 +260,14 @@ always @(posedge MCLK) begin
 		if (VCLKCNT == VCLKMAX) begin
 			VCLKCNT <= 0;
 			M68K_CLKENp <= ~PAUSE_EN;
+			pause_reg <= PAUSE_EN;
 			VCLKMAX <= (TURBO == 2) ? 4'd1 : (TURBO == 1) ? 4'd3 : 4'd6;
 			VCLKMID <= (TURBO == 2) ? 4'd0 : (TURBO == 1) ? 4'd1 : 4'd3;
 		end
 
 		M68K_CLKENn <= 0;
 		if (VCLKCNT == VCLKMID) begin
-			M68K_CLKENn <= ~PAUSE_EN;
+			M68K_CLKENn <= ~pause_reg;
 		end
 
 		FM_CLKEN <= 0;
@@ -460,6 +462,7 @@ vdp vdp
 (
 	.RST_N(~hard_reset),
 	.CLK(MCLK),
+	.CE(~pause_reg),
 
 	.SEL(VDP_SEL),
 	.A({MBUS_A[4:1], 1'b0}),

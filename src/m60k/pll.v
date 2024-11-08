@@ -1,11 +1,11 @@
 //Copyright (C)2014-2024 Gowin Semiconductor Corporation.
 //All rights reserved.
 //File Title: IP file
-//Tool Version: V1.9.10.02
+//Tool Version: V1.9.10.03 (64-bit)
 //Part Number: GW5AT-LV60PG484AC1/I0
 //Device: GW5AT-60
 //Device Version: B
-//Created Time: Thu Nov  7 22:59:12 2024
+//Created Time: Fri Nov  8 21:21:28 2024
 
 module pll (clkout0, clkout1, clkout2, clkin);
 

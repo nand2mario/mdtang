@@ -40,6 +40,7 @@
 module vdp(
    input            RST_N,
    input            CLK,
+   input            CE,                // nand2mario: CE=0: VDP is paused and no pixels are output
    
    input            SEL,               // MMIO interface, C00000-C0001F
    input [4:0]      A,
@@ -879,7 +880,7 @@ module vdp(
          BGA_VRAM32_ACK_REG <= 1'b0;
          BGB_VRAM32_ACK_REG <= 1'b0;
       
-      end else begin  
+      end else if (CE) begin  
          if (SP3_SEL == 1'b0)
             SP3_VRAM32_ACK_REG <= 1'b0;
          if (BGA_SEL == 1'b0)
@@ -944,7 +945,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          HSC_SEL <= 1'b0;
-      else  begin
+      else if (CE) begin
          if (V_ACTIVE & HV_HCNT == HSCROLL_READ & HV_PIXDIV == 0) begin
             
             case (HSCR)		// Horizontal scroll mode
@@ -987,7 +988,7 @@ module vdp(
          BGB_SEL <= 1'b0;
          BGB_ENABLE <= 1'b1;
          BGBC <= BGBC_DONE;
-      end else 
+      end else if (CE) 
          case (BGBC)
             BGBC_DONE :
                begin
@@ -1231,7 +1232,7 @@ module vdp(
          BGA_SEL <= 1'b0;
          BGAC <= BGAC_DONE;
          BGA_ENABLE <= 1'b1;
-      end else 
+      end else if (CE)
          case (BGAC)
             BGAC_DONE :    // 9
                begin
@@ -1522,7 +1523,7 @@ module vdp(
          OBJ_CACHE_ADDR_WR <= {7{1'b0}};
          OBJ_CACHE_WE <= 2'b00;
       
-      end else begin
+      end else if (CE) begin
          
          OBJ_CACHE_WE <= {OBJ_CACHE_WE[0], 1'b0};
          
@@ -1554,7 +1555,7 @@ module vdp(
          
          OBJ_VISINFO_ADDR_WR <= {6{1'b0}};
       
-      end else 
+      end else if (CE) 
          
          case (SP1C)
             SP1C_INIT :
@@ -1660,7 +1661,7 @@ module vdp(
          OBJ_SPINFO_ADDR_WR <= {6{1'b0}};
          OBJ_SPINFO_WE <= 1'b0;
       
-      end else 
+      end else if (CE) 
          
          case (SP2C)
             SP2C_INIT :
@@ -1783,7 +1784,7 @@ module vdp(
          SCOL_SET <= 1'b0;
          SOVR_SET <= 1'b0;
       
-      end else  begin
+      end else if (CE) begin
          
          SCOL_SET <= 1'b0;
          SOVR_SET <= 1'b0;
@@ -2100,7 +2101,7 @@ module vdp(
          SP1_EN <= 1'b0;
          SP2_EN <= 1'b0;
       
-      end else  begin
+      end else if (CE) begin
          
          EXINT_PENDING_SET <= 1'b0;
          HINT_PENDING_SET <= 1'b0;
@@ -2288,6 +2289,7 @@ module vdp(
    begin
       reg [8:0]        x;
 
+      if (CE) 
       if (VBL_AREA == 1'b0)
          // As displaying and sprite rendering (part 3) overlap,
          // copy and clear the sprite buffer a bit sooner.
@@ -2333,6 +2335,7 @@ module vdp(
       reg [5:0]        cold;
       reg [8:0]        x;
          
+   if (CE) begin
       if (IN_HBL | VBL_AREA) begin
          BGB_COLINFO_ADDR_B <= {9{1'b0}};
          BGA_COLINFO_ADDR_B <= {9{1'b0}};
@@ -2467,6 +2470,7 @@ module vdp(
                ;
          endcase
    end
+   end
    
    //--------------------------------------------------------------
    // VIDEO OUTPUT
@@ -2476,7 +2480,7 @@ module vdp(
       if (RST_N == 1'b0) begin
          FF_VS <= 1'b1;
          FF_HS <= 1'b1;
-      end else  begin
+      end else if (CE) begin
          
          // horizontal sync
          if (HV_HCNT == HSYNC_START)
@@ -2500,33 +2504,35 @@ module vdp(
       reg [10:0]       VS_END_DELAY;
       reg              VS_DELAY_ACTIVE;
 
-      if (FF_VS) begin
-         // LSM(0) = 1 and FIELD = 0 right before vsync start -> start the delay
-         if (HV_HCNT == VSYNC_HSTART & HV_VCNT == VSYNC_START & LSM[0] & FIELD == 1'b0) begin
-            VS_START_DELAY = 1710;
-            VS_DELAY_ACTIVE = 1'b1;
-         end 
-         
-         // FF_VS already inactive, but end delay still != 0
-         if (VS_END_DELAY != 0)
-            VS_END_DELAY = VS_END_DELAY - 1;
-         else
-            VS <= 1'b1;
-      end else begin
-         
-         // FF_VS = '0'
-         if (VS_DELAY_ACTIVE) begin
-            VS_END_DELAY = 1710;
-            VS_DELAY_ACTIVE = 1'b0;
-         end 
-         
-         // FF_VS active, but start delay still != 0
-         if (VS_START_DELAY != 0)
-            VS_START_DELAY = VS_START_DELAY - 1;
-         else
-            VS <= 1'b0;
+      if (CE) begin
+         if (FF_VS) begin
+            // LSM(0) = 1 and FIELD = 0 right before vsync start -> start the delay
+            if (HV_HCNT == VSYNC_HSTART & HV_VCNT == VSYNC_START & LSM[0] & FIELD == 1'b0) begin
+               VS_START_DELAY = 1710;
+               VS_DELAY_ACTIVE = 1'b1;
+            end 
+            
+            // FF_VS already inactive, but end delay still != 0
+            if (VS_END_DELAY != 0)
+               VS_END_DELAY = VS_END_DELAY - 1;
+            else
+               VS <= 1'b1;
+         end else begin
+            
+            // FF_VS = '0'
+            if (VS_DELAY_ACTIVE) begin
+               VS_END_DELAY = 1710;
+               VS_DELAY_ACTIVE = 1'b0;
+            end 
+            
+            // FF_VS active, but start delay still != 0
+            if (VS_START_DELAY != 0)
+               VS_START_DELAY = VS_START_DELAY - 1;
+            else
+               VS <= 1'b0;
+         end
+         HS <= FF_HS;
       end
-      HS <= FF_HS;
    end
    
    assign R = FF_R;
@@ -2543,7 +2549,7 @@ module vdp(
       reg              V30prev;
 
       CE_PIX <= 1'b0;
-      if (HV_PIXDIV == 4'b0101) begin
+      if (CE && HV_PIXDIV == 4'b0101) begin
          
          if (HV_HCNT == VSYNC_HSTART & HV_VCNT == VSYNC_START)
             FIELD_OUT <= LSM[1] & LSM[0] & (~FIELD_LATCH);
@@ -2634,7 +2640,7 @@ module vdp(
          BR_N <= 1'b1;
          BGACK_N_REG <= 1'b1;
       
-      end else  begin
+      end else if (CE) begin
          
          if (DT_RD_SEL == 1'b0)
             DT_RD_DTACK_N <= 1'b1;
@@ -3219,7 +3225,7 @@ module vdp(
          EXINT_PENDING <= 1'b0;
          HINT_PENDING <= 1'b0;
          VINT_TG68_PENDING <= 1'b0;
-      end else  begin
+      end else if (CE) begin
          INTACK_D <= INTACK;
          //acknowledge interrupts serially
          if (INTACK_D == 1'b0 & INTACK) begin
@@ -3244,7 +3250,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          EXINT_FF <= 1'b0;
-      else  begin
+      else if (CE) begin
          if (EXINT_PENDING & IE2)
             EXINT_FF <= 1'b1;
          else
@@ -3257,7 +3263,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          HINT_FF <= 1'b0;
-      else  begin
+      else if (CE) begin
          if (HINT_PENDING & IE1)
             HINT_FF <= 1'b1;
          else
@@ -3270,7 +3276,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          VINT_TG68_FF <= 1'b0;
-      else  begin
+      else if (CE) begin
          if (VINT_TG68_PENDING & IE0)
             VINT_TG68_FF <= 1'b1;
          else
@@ -3283,7 +3289,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          VINT_T80_FF <= 1'b0;
-      else  begin
+      else if (CE) begin
          if (VINT_T80_SET)
             VINT_T80_FF <= 1'b1;
          else if (VINT_T80_CLR)
@@ -3294,7 +3300,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          SCOL <= 1'b0;
-      else  begin
+      else if (CE) begin
          if (SCOL_SET)
             SCOL <= 1'b1;
          else if (SCOL_CLR)
@@ -3305,7 +3311,7 @@ module vdp(
    always @(posedge CLK)
       if (RST_N == 1'b0)
          SOVR <= 1'b0;
-      else  begin
+      else if (CE) begin
          if (SOVR_SET)
             SOVR <= 1'b1;
          else if (SOVR_CLR)
