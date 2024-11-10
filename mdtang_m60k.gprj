@@ -102,7 +102,7 @@
         <File path="src/m138k/m138k.cst" type="file.cst" enable="1"/>
         <File path="src/mdtang.sdc" type="file.sdc" enable="1"/>
         <File path="src/cpu.gao" type="file.gao" enable="0"/>
-        <File path="src/framebuffer.rao" type="file.gao" enable="1"/>
+        <File path="src/framebuffer.rao" type="file.gao" enable="0"/>
         <File path="src/iosys.gao" type="file.gao" enable="0"/>
     </FileList>
 </Project>

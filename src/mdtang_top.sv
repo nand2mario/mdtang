@@ -110,7 +110,7 @@ end
 /* verilator public_on */
 reg        md_on;
 wire [1:0] resolution;          // {V30, H40}, V30: verticle 240 vs 224, H40: horizontal 320 vs 256
-wire ce_pix, hblank, vblank;
+wire ce_pix, hblank, vblank, hsync;
 wire       pause_core;
 wire [3:0] red   /* xsynthesis syn_keep=1 */, 
            green /* xsynthesis syn_keep=1 */, 
@@ -134,7 +134,7 @@ system megadrive (
     .NORAM_QUIRK('0), .PIER_QUIRK('0), .SVP_QUIRK('0), .FMBUSY_QUIRK('0), .SCHAN_QUIRK('0), .TURBO('0), 
     .GG_RESET('0), .GG_EN('0), .GG_CODE('0), .GG_AVAILABLE(),
     .BRAM_A(), .BRAM_DI(), .BRAM_DO(), .BRAM_WE(), .BRAM_CHANGE(),
-    .RED(red), .GREEN(green), .BLUE(blue), .VS(), .HS(), .HBL(hblank), .VBL(vblank), .CE_PIX(ce_pix), 
+    .RED(red), .GREEN(green), .BLUE(blue), .VS(), .HS(hsync), .HBL(hblank), .VBL(vblank), .CE_PIX(ce_pix), 
     .BORDER('0), .CRAM_DOTS('0), .INTERLACE(), .FIELD(), .RESOLUTION(resolution),
     .J3BUT('0), .JOY_1(joy1), .JOY_2(joy2), .JOY_3(), .JOY_4(), .JOY_5(), .MULTITAP('0),
     .MOUSE('0), .MOUSE_OPT('0), .GUN_OPT('0), .GUN_TYPE('0), .GUN_SENSOR('0), .GUN_A('0),
@@ -279,24 +279,36 @@ reg ce_pix_r, hblank_r;
 reg [8:0] x;
 reg [7:0] y;
 
+// there are 15 dummy pixels after VBLANK before the first HBLANK
+reg hsync_seen;
 always @(posedge clk_sys) begin
     ce_pix_r <= ce_pix;
-    hblank_r <= hblank;
-    if (ce_pix & ~ce_pix_r & ~hblank & ~vblank)
-        x <= x + 1;
-    if (hblank & ~hblank_r) begin
-        x <= 0;
-        y <= y + 1;
-    end
-    if (vblank) 
+
+    // maintain y position
+    if (vblank) begin
         y <= 0;
+        hsync_seen <= 0;
+    end
+    if (hsync)
+        hsync_seen <= 1;
+
+    hblank_r <= hblank;
+    if (hsync_seen) begin           // start frame after first hsync
+        if (ce_pix & ~ce_pix_r & ~hblank & ~vblank)
+            x <= x + 1;
+        if (hblank) begin
+            x <= 0;
+            if (!hblank_r)
+                y <= y + 1;
+        end
+    end
 end
 
 framebuffer #(
     .WIDTH(320), .HEIGHT(240), .COLOR_BITS(4)
 ) fb (
     .clk(clk_sys), .resetn(~reset), .clk_pixel(hclk), .clk_5x_pixel(hclk5),
-    .ce_pix(ce_pix), .r(red), .g(green), .b(blue), .x(x), .y(y), 
+    .ce_pix(ce_pix & hsync_seen), .r(red), .g(green), .b(blue), .x(x), .y(y), 
     .width(resolution[0] ? 320 : 256), .height(resolution[1] ? 240 : 224),      // resolution: 0: 256x224, 1: 320x224, 2: 256x240, 3: 320x240
     .audio_left(audio_left), .audio_right(audio_right),
     .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),

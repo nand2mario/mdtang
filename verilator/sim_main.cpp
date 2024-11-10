@@ -24,6 +24,7 @@ int resolution = -1;
 int resolution_x = H_RES;
 int resolution_y = V_RES;
 int pixel_x, pixel_y;
+bool hsync_seen;
 
 typedef struct Pixel
 {			   // for SDL texture
@@ -301,20 +302,27 @@ int main(int argc, char **argv, char **env)
 				}
 			}
 
-			if (md->vblank)
+			if (md->vblank) {
 				pixel_y = 0;
+				hsync_seen = false;
+			}
+			if (md->hs) {
+				hsync_seen = true;
+			}
 
-			if (md->hblank) {
-			    pixel_x = 0;
-				if (!hblank_r) {
-					pixel_y++;
-					if (pixel_y == 3)
-						frame_updated = false;
+			if (hsync_seen) {
+				if (md->hblank) {
+					pixel_x = 0;
+					if (!hblank_r) {
+						pixel_y++;
+						if (pixel_y == 3)
+							frame_updated = false;
+					}
 				}
 			}
 			hblank_r = md->hblank;
 
-			if (md->ce_pix && !ce_pix_r && pixel_x < H_RES && pixel_y < V_RES) {
+			if (hsync_seen && md->ce_pix && !ce_pix_r && pixel_x < H_RES && pixel_y < V_RES) {
 				Pixel *p = &screenbuffer[pixel_y * H_RES + pixel_x];
 				p->a = 0xff;
 				p->r = md->red << 4;
