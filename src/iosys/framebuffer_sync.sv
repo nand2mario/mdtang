@@ -86,13 +86,15 @@ end
 
 // Video synchronization
 reg sync_done = 1'b0;
-reg hdmi_first_line;
+reg hdmi_first_line, hdmi_first_line_r, hdmi_first_line_rr;
 always @(posedge clk) begin
+    hdmi_first_line_r <= hdmi_first_line;
+    hdmi_first_line_rr <= hdmi_first_line_r;
     if (~sync_done) begin
         if (~pause_core) begin
-            if (y == 0 && x == 1)                             // halt on core starting line 1
+            if (y == 1 && x == 0)                           // halt on core starting line 1
                 pause_core <= 1'b1;
-        end else if (hdmi_first_line && pause_core) begin     // resume when HDMI start line 0
+        end else if (hdmi_first_line_rr && pause_core) begin     // resume when HDMI start line 0
             pause_core <= 1'b0;
             sync_done <= 1'b1;
         end

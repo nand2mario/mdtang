@@ -1,6 +1,6 @@
 
- create_clock -name clk50 -period 20.00  -waveform {0 10.00} [get_nets {clk50}]
-create_clock -name clk_sys -period 18.60 -waveform {0 9.3} [get_nets {clk_sys}]
+create_clock -name clk50 -period 20.00  -waveform {0 10.00} [get_nets {clk50}]
+create_clock -name clk_sys -period 18.57 -waveform {0 9.29} [get_nets {clk_sys}]
 create_generated_clock -name clk_z80 -source [get_nets {clk_sys}] -divide_by 2 [get_nets {clk_z80}]
 
 // Z80 to M68K, 2 clk_sys cycles
