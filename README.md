@@ -3,15 +3,15 @@
 
 <img src='doc/mdtang-0.1.jpg' width="300" />
 
-This is a port of the [Genesis-MiSTer](https://github.com/MiSTer-devel/Genesis_MiSTer) core to Sipeed FPGA boards including Tang Mega 138K, Mega 138K Pro and the upcoming TangConsole 60K. It is the latest addition following [NESTang](https://github.com/nand2mario/nestang), [SNESTang](https://github.com/nand2mario/snestang) and [GBATang](https://github.com/nand2mario/gbatang).
+This is a port of the [Genesis-MiSTer](https://github.com/MiSTer-devel/Genesis_MiSTer) core to Sipeed FPGA boards including Tang Mega 60K, 138K and 138K Pro. It is the latest addition following [NESTang](https://github.com/nand2mario/nestang), [SNESTang](https://github.com/nand2mario/snestang) and [GBATang](https://github.com/nand2mario/gbatang).
 
-This is a mostly verbatim port. So game compatibility should be good. However, many features are not activated yet, such as country settings (set to Americas/NTSC), audio filters and SRAM saves. These features will be enabled over time. In addition, Tang Mega 60K is likely to be supported once I get a board.
+This is a mostly verbatim port. So game compatibility should be good. However, many features are not activated yet, such as country settings (set to Americas/NTSC), audio filters and SRAM saves. These features will be enabled over time.
 
 Follow [me](https://x.com/nand2mario) on X to get updates.
 
 ## Instructions
 
-You need a Tang Mega 138K or Tang Mega 138K Pro board. You also need a [Tang DS2 Pmod](https://wiki.sipeed.com/hardware/en/tang/tang-PMOD/FPGA_PMOD.html), a [Tang SDRAM Pmod](https://wiki.sipeed.com/hardware/en/tang/tang-PMOD/FPGA_PMOD.html), a [DS2 controller](https://en.wikipedia.org/wiki/DualShock), and finally a MicroSD card. Then assemble the parts as shown in the picture above.
+In addition to the FPGA board, you also need a [Tang DS2 Pmod](https://wiki.sipeed.com/hardware/en/tang/tang-PMOD/FPGA_PMOD.html), a [Tang SDRAM Pmod](https://wiki.sipeed.com/hardware/en/tang/tang-PMOD/FPGA_PMOD.html), a [DS2 controller](https://en.wikipedia.org/wiki/DualShock), and finally a MicroSD card. Then assemble the parts as shown in the picture above.
 
 Then follow these steps to install the core (for detailed instructions, for now refer to [SNESTang installation](https://github.com/nand2mario/snestang/blob/main/doc/installation.md)),
 
