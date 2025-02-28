@@ -3,11 +3,12 @@
 <Project>
     <Template>FPGA</Template>
     <Version>5</Version>
-    <Device name="GW5AST-138B" pn="GW5AST-LV138PG484AC1/I0">gw5ast138b-011</Device>
+    <Device name="GW5AT-60B" pn="GW5AT-LV60PG484AC1/I0">gw5at60b-002</Device>
     <FileList>
         <File path="src/common/dpram.v" type="file.verilog" enable="1"/>
         <File path="src/common/dpram32_block.v" type="file.verilog" enable="1"/>
         <File path="src/common/dpram_block.v" type="file.verilog" enable="1"/>
+        <File path="src/console60k/mdtang.cst" type="file.cst" enable="1"/>
         <File path="src/fx68k/fx68k.sv" type="file.verilog" enable="1"/>
         <File path="src/fx68k/fx68kAlu.sv" type="file.verilog" enable="1"/>
         <File path="src/fx68k/uaddrPla.sv" type="file.verilog" enable="1"/>
@@ -22,15 +23,11 @@
         <File path="src/hdmi/source_product_description_info_frame.sv" type="file.verilog" enable="1"/>
         <File path="src/hdmi/tmds_channel.sv" type="file.verilog" enable="1"/>
         <File path="src/iosys/dualshock_controller.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/framebuffer.sv" type="file.verilog" enable="1"/>
+        <File path="src/iosys/framebuffer_sync.sv" type="file.verilog" enable="1"/>
         <File path="src/iosys/gowin_dpb_menu.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/iosys_picorv32.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/picorv32.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/simplespimaster1x.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/simpleuart.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/spi_master.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/spiflash.v" type="file.verilog" enable="1"/>
+        <File path="src/iosys/iosys_bl616.v" type="file.verilog" enable="1"/>
         <File path="src/iosys/textdisp.v" type="file.verilog" enable="1"/>
+        <File path="src/iosys/uart_fractional.v" type="file.verilog" enable="1"/>
         <File path="src/jt12/adpcm/jt10_adpcm_div.v" type="file.verilog" enable="1"/>
         <File path="src/jt12/jt12.v" type="file.verilog" enable="1"/>
         <File path="src/jt12/jt12_acc.v" type="file.verilog" enable="1"/>
@@ -77,9 +74,9 @@
         <File path="src/jt89/jt89_noise.v" type="file.verilog" enable="1"/>
         <File path="src/jt89/jt89_tone.v" type="file.verilog" enable="1"/>
         <File path="src/jt89/jt89_vol.v" type="file.verilog" enable="1"/>
-        <File path="src/m138k/pll.v" type="file.verilog" enable="1"/>
-        <File path="src/m138k/pll_27.v" type="file.verilog" enable="1"/>
-        <File path="src/m138k/pll_74.v" type="file.verilog" enable="1"/>
+        <File path="src/m60k/pll.v" type="file.verilog" enable="1"/>
+        <File path="src/m60k/pll_27.v" type="file.verilog" enable="1"/>
+        <File path="src/m60k/pll_74.v" type="file.verilog" enable="1"/>
         <File path="src/mdtang_top.sv" type="file.verilog" enable="1"/>
         <File path="src/memory/rv_sdram_adapter.v" type="file.verilog" enable="1"/>
         <File path="src/memory/sdram.v" type="file.verilog" enable="1"/>
@@ -100,7 +97,9 @@
         <File path="src/vdp/vdp_common.v" type="file.verilog" enable="1"/>
         <File path="src/vdp/vram.v" type="file.verilog" enable="1"/>
         <File path="src/m138k/m138k.cst" type="file.cst" enable="1"/>
+        <File path="src/mdtang.sdc" type="file.sdc" enable="1"/>
         <File path="src/cpu.gao" type="file.gao" enable="0"/>
+        <File path="src/framebuffer.rao" type="file.gao" enable="0"/>
         <File path="src/iosys.gao" type="file.gao" enable="0"/>
     </FileList>
 </Project>

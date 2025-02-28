@@ -219,16 +219,6 @@ sdram #(.FREQ(FREQ)) u_sdram (
     .SDRAM_nCAS(O_sdram_cas_n), .SDRAM_CKE(O_sdram_cke), .SDRAM_DQM(O_sdram_dqm)
 );
 
-rv_sdram_adapter rv_adapt (
-    .clk(clk_sys), .resetn(~reset), 
-    .rv_valid(rv_valid), .rv_addr(rv_addr), .rv_wdata(rv_wdata),
-    .rv_wstrb(rv_wstrb), .rv_ready(rv_ready), .rv_rdata(rv_rdata),
-
-    .mem_addr(rv_mem_addr), .mem_req(rv_mem_req), .mem_ds(rv_mem_ds),
-    .mem_din(rv_mem_din), .mem_we(rv_mem_we), .mem_req_ack(rv_mem_ack),
-    .mem_dout(rv_mem_dout)
-);
-
 // iosys for menu, rom loading and other functions -----------------------------------------
 wire iosys_loaded;
 wire overlay;
@@ -236,7 +226,19 @@ wire [7:0] overlay_x;
 wire [7:0] overlay_y;
 wire [14:0] overlay_color;
 
-iosys #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
+`ifdef MCU_BL616
+
+iosys_bl616 #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
+    .clk(clk_sys), .hclk(hclk), .resetn(~reset),
+    .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),
+    .joy1(joy_btns), .joy2(joy2_btns),
+    .rom_loading(loading), .rom_do(loader_do), .rom_do_valid(loader_do_valid), 
+    .uart_tx(UART_TXD), .uart_rx(UART_RXD)
+);
+
+`else
+
+iosys_picorv32 #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
     .clk(clk_sys), .hclk(hclk), .resetn(~reset),
 
     .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),
@@ -258,6 +260,18 @@ iosys #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
     .sd_clk(sd_clk), .sd_cmd(sd_cmd), .sd_dat0(sd_dat0), .sd_dat1(sd_dat1),
     .sd_dat2(sd_dat2), .sd_dat3(sd_dat3)
 );
+
+rv_sdram_adapter rv_adapt (
+    .clk(clk_sys), .resetn(~reset), 
+    .rv_valid(rv_valid), .rv_addr(rv_addr), .rv_wdata(rv_wdata),
+    .rv_wstrb(rv_wstrb), .rv_ready(rv_ready), .rv_rdata(rv_rdata),
+
+    .mem_addr(rv_mem_addr), .mem_req(rv_mem_req), .mem_ds(rv_mem_ds),
+    .mem_din(rv_mem_din), .mem_we(rv_mem_we), .mem_req_ack(rv_mem_ack),
+    .mem_dout(rv_mem_dout)
+);
+
+`endif
 
 // Gamepads ------------------------------------------------------------------------------
 dualshock_controller #(.FREQ(FREQ)) ds (
