@@ -7,21 +7,24 @@ echo
 echo "============ Building console60k ==============="
 echo
 %GWSH% build.tcl console60k
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo
 echo "============ Building mega60k ==============="
 echo
 %GWSH% build.tcl mega60k 
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo
 echo "============ Building mega138k ==============="
 echo
 %GWSH% build.tcl mega138k
+if %errorlevel% neq 0 exit /b %errorlevel%
 
-echo
-echo "============ Building mega138k pro ==============="
-echo
-%GWSH% build.tcl mega138kpro
+@REM echo
+@REM echo "============ Building mega138k pro ==============="
+@REM echo
+@REM %GWSH% build.tcl mega138kpro
 
 dir impl\pnr\*.fs
 

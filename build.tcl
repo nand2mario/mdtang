@@ -41,7 +41,7 @@ if {$dev eq "mega60k"} {
     error "Unknown device $dev"
 }
 add_file -type sdc "src/mdtang.sdc"
-set_option -output_base_name mdtang_${dev}_${mcu}
+set_option -output_base_name mdtang_${dev}
 
 if {$mcu eq "bl616"} {
     add_file -type verilog "src/iosys/iosys_bl616.v"
