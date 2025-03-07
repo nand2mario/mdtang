@@ -8,7 +8,7 @@
         <File path="src/common/dpram.v" type="file.verilog" enable="1"/>
         <File path="src/common/dpram32_block.v" type="file.verilog" enable="1"/>
         <File path="src/common/dpram_block.v" type="file.verilog" enable="1"/>
-        <File path="src/console60k/mdtang.cst" type="file.cst" enable="1"/>
+        <File path="src/framebuffer_sync.sv" type="file.verilog" enable="1"/>
         <File path="src/fx68k/fx68k.sv" type="file.verilog" enable="1"/>
         <File path="src/fx68k/fx68kAlu.sv" type="file.verilog" enable="1"/>
         <File path="src/fx68k/uaddrPla.sv" type="file.verilog" enable="1"/>
@@ -23,11 +23,10 @@
         <File path="src/hdmi/source_product_description_info_frame.sv" type="file.verilog" enable="1"/>
         <File path="src/hdmi/tmds_channel.sv" type="file.verilog" enable="1"/>
         <File path="src/iosys/dualshock_controller.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/framebuffer_sync.sv" type="file.verilog" enable="1"/>
         <File path="src/iosys/gowin_dpb_menu.v" type="file.verilog" enable="1"/>
         <File path="src/iosys/iosys_bl616.v" type="file.verilog" enable="1"/>
         <File path="src/iosys/textdisp.v" type="file.verilog" enable="1"/>
-        <File path="src/iosys/uart_fractional.v" type="file.verilog" enable="1"/>
+        <File path="src/iosys/uart_fixed.v" type="file.verilog" enable="1"/>
         <File path="src/jt12/adpcm/jt10_adpcm_div.v" type="file.verilog" enable="1"/>
         <File path="src/jt12/jt12.v" type="file.verilog" enable="1"/>
         <File path="src/jt12/jt12_acc.v" type="file.verilog" enable="1"/>
@@ -96,7 +95,8 @@
         <File path="src/vdp/vdp.v" type="file.verilog" enable="1"/>
         <File path="src/vdp/vdp_common.v" type="file.verilog" enable="1"/>
         <File path="src/vdp/vram.v" type="file.verilog" enable="1"/>
-        <File path="src/m138k/m138k.cst" type="file.cst" enable="1"/>
+        <File path="src/console60k/mdtang.cst" type="file.cst" enable="1"/>
+        <File path="src/m138k/m138k.cst" type="file.cst" enable="0"/>
         <File path="src/mdtang.sdc" type="file.sdc" enable="1"/>
         <File path="src/cpu.gao" type="file.gao" enable="0"/>
         <File path="src/framebuffer.rao" type="file.gao" enable="0"/>

@@ -31,7 +31,7 @@ module mdtang_top (
     output flash_spi_wp_n,          // write protect
     output flash_spi_hold_n,        // hold operations
 
-    // dualshock controller on pmod0
+    // dualshock controller
     output ds_clk,
     input ds_miso,
     output ds_mosi,
@@ -40,7 +40,6 @@ module mdtang_top (
     input ds2_miso,
     output ds2_mosi,
     output ds2_cs,
-
 
     // SDRAM
     output O_sdram_clk,
@@ -275,14 +274,14 @@ rv_sdram_adapter rv_adapt (
 
 // Gamepads ------------------------------------------------------------------------------
 dualshock_controller #(.FREQ(FREQ)) ds (
-    .clk(clk_sys), .I_RSTn(~reset), 
+    .clk(clk_sys), .I_RSTn(1'b1), 
     .O_psCLK(ds_clk), .O_psSEL(ds_cs), .O_psTXD(ds_mosi), .I_psRXD(ds_miso),
     .O_RXD_1(), .O_RXD_2(), .O_RXD_3(), .O_RXD_4(), .O_RXD_5(), .O_RXD_6(),
     .snes_btns(joy_btns)
 );
 
 dualshock_controller #(.FREQ(FREQ)) ds2 (
-    .clk(clk_sys), .I_RSTn(~reset), 
+    .clk(clk_sys), .I_RSTn(1'b1), 
     .O_psCLK(ds2_clk), .O_psSEL(ds2_cs), .O_psTXD(ds2_mosi), .I_psRXD(ds2_miso),
     .O_RXD_1(), .O_RXD_2(), .O_RXD_3(), .O_RXD_4(), .O_RXD_5(), .O_RXD_6(),
     .snes_btns(joy2_btns)

@@ -46,17 +46,19 @@ set_option -output_base_name mdtang_${dev}_${mcu}
 if {$mcu eq "bl616"} {
     add_file -type verilog "src/iosys/iosys_bl616.v"
     add_file -type verilog "src/iosys/picorv32.v"
+    add_file -type verilog "src/iosys/uart_fixed.v"
+} elseif {$mcu eq "picorv32"} {
+    add_file -type verilog "src/iosys/iosys_picorv32.v"
     add_file -type verilog "src/iosys/simplespimaster1x.v"
     add_file -type verilog "src/iosys/simpleuart.v"
     add_file -type verilog "src/iosys/spi_master.v"
     add_file -type verilog "src/iosys/spiflash.v"
-} elseif {$mcu eq "picorv32"} {
-    add_file -type verilog "src/iosys/iosys_picorv32.v"
-    add_file -type verilog "src/iosys/uart_fractional.v"
 } else {
     error "Unknown mcu $mcu"
 }
 add_file -type verilog "src/iosys/textdisp.v"
+add_file -type verilog "src/iosys/gowin_dpb_menu.v"
+add_file -type verilog "src/iosys/dualshock_controller.v"
 
 add_file -type verilog "src/common/dpram.v"
 add_file -type verilog "src/common/dpram32_block.v"
@@ -74,9 +76,7 @@ add_file -type verilog "src/hdmi/packet_picker.sv"
 add_file -type verilog "src/hdmi/serializer.sv"
 add_file -type verilog "src/hdmi/source_product_description_info_frame.sv"
 add_file -type verilog "src/hdmi/tmds_channel.sv"
-add_file -type verilog "src/iosys/dualshock_controller.v"
-add_file -type verilog "src/iosys/framebuffer_sync.sv"
-add_file -type verilog "src/iosys/gowin_dpb_menu.v"
+add_file -type verilog "src/framebuffer_sync.sv"
 add_file -type verilog "src/jt12/adpcm/jt10_adpcm_div.v"
 add_file -type verilog "src/jt12/jt12.v"
 add_file -type verilog "src/jt12/jt12_acc.v"
@@ -156,6 +156,6 @@ set_option -use_mspi_as_gpio 1
 set_option -use_cpu_as_gpio 1
 
 # use the slower but timing-optimized place algorithm
-set_option -place_option 2
+set_option -place_option 3
 
 run all
