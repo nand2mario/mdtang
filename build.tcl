@@ -157,5 +157,6 @@ set_option -use_cpu_as_gpio 1
 
 # use the slower but timing-optimized place algorithm
 set_option -place_option 3
+# set_option -place_option 2
 
 run all

@@ -91,6 +91,7 @@ wire [2:0]  loading;
 wire        loader_do_valid;
 wire [7:0]  loader_do;
 wire [11:0] joy_btns, joy2_btns;
+wire [11:0] hid1, hid2;
 `endif
 
 localparam FREQ = 53_750_000;
@@ -122,8 +123,8 @@ wire [15:0] mem_data, mem_wdata;
 wire [1:0] mem_be;
 wire mem_req, mem_ack, mem_we;
 
-wire [11:0] joy1 = btn_snes2md(joy_btns);
-wire [11:0] joy2 = btn_snes2md(joy2_btns);
+wire [11:0] joy1 = btn_snes2md(joy_btns | hid1);
+wire [11:0] joy2 = btn_snes2md(joy2_btns | hid2);
 
 // MegaDrive system -------------------------------------------------------------------
 system megadrive (
@@ -230,7 +231,7 @@ wire [14:0] overlay_color;
 iosys_bl616 #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
     .clk(clk_sys), .hclk(hclk), .resetn(~reset),
     .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),
-    .joy1(joy_btns), .joy2(joy2_btns),
+    .joy1(joy_btns), .joy2(joy2_btns), .hid1(hid1), .hid2(hid2),
     .rom_loading(loading), .rom_do(loader_do), .rom_do_valid(loader_do_valid), 
     .uart_tx(UART_TXD), .uart_rx(UART_RXD)
 );
