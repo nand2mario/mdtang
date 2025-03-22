@@ -41,6 +41,12 @@ module mdtang_top (
     output ds2_mosi,
     output ds2_cs,
 
+    // USB1 and USB2
+    inout usb1_dp,
+    inout usb1_dn,
+    inout usb2_dp,
+    inout usb2_dn,
+
     // SDRAM
     output O_sdram_clk,
     output O_sdram_cs_n,            // chip select
@@ -56,7 +62,7 @@ module mdtang_top (
     input UART_RXD,
     output UART_TXD,    
 
-    output reg [7:0] led,           // debug leds on pmod1
+    output [7:0] led,
     input s0,
     input s1,
 
@@ -91,6 +97,7 @@ wire [2:0]  loading;
 wire        loader_do_valid;
 wire [7:0]  loader_do;
 wire [11:0] joy_btns, joy2_btns;
+wire [11:0] joy_usb1, joy_usb2;
 wire [11:0] hid1, hid2;
 `endif
 
@@ -123,8 +130,8 @@ wire [15:0] mem_data, mem_wdata;
 wire [1:0] mem_be;
 wire mem_req, mem_ack, mem_we;
 
-wire [11:0] joy1 = btn_snes2md(joy_btns | hid1);
-wire [11:0] joy2 = btn_snes2md(joy2_btns | hid2);
+wire [11:0] joy1 = btn_snes2md(joy_btns | hid1 | joy_usb1);
+wire [11:0] joy2 = btn_snes2md(joy2_btns | hid2 | joy_usb2);
 
 // MegaDrive system -------------------------------------------------------------------
 system megadrive (
@@ -226,52 +233,13 @@ wire [7:0] overlay_x;
 wire [7:0] overlay_y;
 wire [14:0] overlay_color;
 
-`ifdef MCU_BL616
-
 iosys_bl616 #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
     .clk(clk_sys), .hclk(hclk), .resetn(~reset),
     .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),
-    .joy1(joy_btns), .joy2(joy2_btns), .hid1(hid1), .hid2(hid2),
+    .joy1(joy_btns | joy_usb1), .joy2(joy2_btns | joy_usb2), .hid1(hid1), .hid2(hid2),
     .rom_loading(loading), .rom_do(loader_do), .rom_do_valid(loader_do_valid), 
     .uart_tx(UART_TXD), .uart_rx(UART_RXD)
 );
-
-`else
-
-iosys_picorv32 #(.CORE_ID(4), .FREQ(FREQ), .COLOR_LOGO(15'b00000_00100_11111)) iosys (
-    .clk(clk_sys), .hclk(hclk), .resetn(~reset),
-
-    .overlay(overlay), .overlay_x(overlay_x), .overlay_y(overlay_y), .overlay_color(overlay_color),
-    .joy1(joy_btns), .joy2(joy2_btns),
-
-    .rom_loading(loading), .rom_do(loader_do), .rom_do_valid(loader_do_valid), 
-    .ram_busy(sdram_busy),
-
-    .rv_valid(rv_valid), .rv_ready(rv_ready), .rv_addr(rv_addr), .rv_wdata(rv_wdata), 
-    .rv_wstrb(rv_wstrb), .rv_rdata(rv_rdata), 
-
-    .flash_spi_cs_n(flash_spi_cs_n), .flash_spi_miso(flash_spi_miso),
-    .flash_spi_mosi(flash_spi_mosi), .flash_spi_clk(flash_spi_clk),
-    .flash_spi_wp_n(flash_spi_wp_n), .flash_spi_hold_n(flash_spi_hold_n),
-    .flash_loaded(iosys_loaded),
-
-    .uart_tx(UART_TXD), .uart_rx(UART_RXD),
-
-    .sd_clk(sd_clk), .sd_cmd(sd_cmd), .sd_dat0(sd_dat0), .sd_dat1(sd_dat1),
-    .sd_dat2(sd_dat2), .sd_dat3(sd_dat3)
-);
-
-rv_sdram_adapter rv_adapt (
-    .clk(clk_sys), .resetn(~reset), 
-    .rv_valid(rv_valid), .rv_addr(rv_addr), .rv_wdata(rv_wdata),
-    .rv_wstrb(rv_wstrb), .rv_ready(rv_ready), .rv_rdata(rv_rdata),
-
-    .mem_addr(rv_mem_addr), .mem_req(rv_mem_req), .mem_ds(rv_mem_ds),
-    .mem_din(rv_mem_din), .mem_we(rv_mem_we), .mem_req_ack(rv_mem_ack),
-    .mem_dout(rv_mem_dout)
-);
-
-`endif
 
 // Gamepads ------------------------------------------------------------------------------
 dualshock_controller #(.FREQ(FREQ)) ds (
@@ -287,6 +255,30 @@ dualshock_controller #(.FREQ(FREQ)) ds2 (
     .O_RXD_1(), .O_RXD_2(), .O_RXD_3(), .O_RXD_4(), .O_RXD_5(), .O_RXD_6(),
     .snes_btns(joy2_btns)
 );
+
+`ifdef CONSOLE
+wire clk12;
+wire pll_lock_12;
+wire usb_conerr;
+wire [1:0] usb_type;
+pll_12 pll12(.clkin(clk50), .clkout0(clk12), .lock(pll_lock_12));
+usb_hid_host usb_hid_host (
+    .usbclk(clk12), .usbrst_n(pll_lock_12),
+    .usb_dm(usb1_dn), .usb_dp(usb1_dp),
+    .game_snes(joy_usb1), .typ(usb_type), .conerr(usb_conerr)
+);
+usb_hid_host usb_hid_host2 (
+    .usbclk(clk12), .usbrst_n(pll_lock_12),
+    .usb_dm(usb2_dn), .usb_dp(usb2_dp),
+    .game_snes(joy_usb2)
+);
+
+assign led = ~{joy_usb1[4:0], usb_type, usb_conerr};
+
+`else
+assign joy_usb1 = 12'b0;
+assign joy_usb2 = 12'b0;
+`endif
 
 // HDMI output ---------------------------------------------------------------------------
 reg ce_pix_r, hblank_r;
@@ -332,7 +324,7 @@ framebuffer #(
     .tmds_d_n(tmds_d_n), .tmds_d_p(tmds_d_p)
 );
 
-assign led = ~{2'b0, vblank, md_on, loading != 0, overlay, iosys_loaded, ~reset};
+// assign led = ~{2'b0, vblank, md_on, loading != 0, overlay, iosys_loaded, ~reset};
 
 `endif
 

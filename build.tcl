@@ -1,17 +1,11 @@
 if {$argc == 0} {
-    puts "Usage: $argv0 <device> <mcu>"
+    puts "Usage: $argv0 <device>"
     puts "          device: mega60k mega138k mega138kpro console60k"
-    puts "             mcu: bl616, picorv32"
-    puts "Currently supports only ds2 controller"
+    puts "Currently supports ds2 and usb controller"
     exit 1
 }
 
 set dev [lindex $argv 0]
-if {$argc >= 2} {
-    set mcu [lindex $argv 1]
-} else {
-    set mcu "bl616"
-}
 
 if {$dev eq "mega60k"} {
     set_device GW5AT-LV60PG484AC1/I0 -device_version B
@@ -21,10 +15,13 @@ if {$dev eq "mega60k"} {
     add_file -type verilog "src/m60k/pll_74.v"
 } elseif {$dev eq "console60k"} {
     set_device GW5AT-LV60PG484AC1/I0 -device_version B
+    add_file -type verilog "src/console60k/config.v"
     add_file -type cst "src/console60k/mdtang.cst"
     add_file -type verilog "src/m60k/pll.v"
     add_file -type verilog "src/m60k/pll_27.v"
     add_file -type verilog "src/m60k/pll_74.v"    
+    add_file -type verilog "src/usb_hid_host.v"
+    add_file -type verilog "src/console60k/pll_12.v"
 } elseif {$dev eq "mega138k"} {
     set_device GW5AT-LV138PG484AC1/I0 -device_version B
     add_file -type cst "src/m138k/m138k.cst"
@@ -43,19 +40,9 @@ if {$dev eq "mega60k"} {
 add_file -type sdc "src/mdtang.sdc"
 set_option -output_base_name mdtang_${dev}
 
-if {$mcu eq "bl616"} {
-    add_file -type verilog "src/iosys/iosys_bl616.v"
-    add_file -type verilog "src/iosys/picorv32.v"
-    add_file -type verilog "src/iosys/uart_fixed.v"
-} elseif {$mcu eq "picorv32"} {
-    add_file -type verilog "src/iosys/iosys_picorv32.v"
-    add_file -type verilog "src/iosys/simplespimaster1x.v"
-    add_file -type verilog "src/iosys/simpleuart.v"
-    add_file -type verilog "src/iosys/spi_master.v"
-    add_file -type verilog "src/iosys/spiflash.v"
-} else {
-    error "Unknown mcu $mcu"
-}
+add_file -type verilog "src/iosys/iosys_bl616.v"
+add_file -type verilog "src/iosys/uart_fixed.v"
+
 add_file -type verilog "src/iosys/textdisp.v"
 add_file -type verilog "src/iosys/gowin_dpb_menu.v"
 add_file -type verilog "src/iosys/dualshock_controller.v"
