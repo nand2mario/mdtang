@@ -1,6 +1,6 @@
 if {$argc == 0} {
     puts "Usage: $argv0 <device>"
-    puts "          device: mega60k mega138k mega138kpro console60k"
+    puts "          device: mega60k mega138k mega138kpro console60k console138k"
     puts "Currently supports ds2 and usb controller"
     exit 1
 }
@@ -9,31 +9,35 @@ set dev [lindex $argv 0]
 
 if {$dev eq "mega60k"} {
     set_device GW5AT-LV60PG484AC1/I0 -device_version B
-    add_file -type cst "src/m138k/m138k.cst"
-    add_file -type verilog "src/m60k/pll.v"
-    add_file -type verilog "src/m60k/pll_27.v"
-    add_file -type verilog "src/m60k/pll_74.v"
-} elseif {$dev eq "console60k"} {
-    set_device GW5AT-LV60PG484AC1/I0 -device_version B
-    add_file -type verilog "src/console60k/config.v"
-    add_file -type cst "src/console60k/mdtang.cst"
-    add_file -type verilog "src/m60k/pll.v"
-    add_file -type verilog "src/m60k/pll_27.v"
-    add_file -type verilog "src/m60k/pll_74.v"    
+    add_file -type cst "src/boards/mega.cst"
+    add_file -type verilog "src/plla/pll.v"
+    add_file -type verilog "src/plla/pll_27.v"
+    add_file -type verilog "src/plla/pll_74.v"
+} elseif {$dev eq "console60k" || $dev eq "console138k"} {
+    if {$dev eq "console60k"} {
+        set_device GW5AT-LV60PG484AC1/I0 -device_version B
+    } else {
+        set_device GW5AST-LV138PG484AC1/I0 -device_version B
+    }
+    add_file -type verilog "src/boards/console.v"
+    add_file -type cst "src/boards/console.cst"
+    add_file -type verilog "src/plla/pll.v"
+    add_file -type verilog "src/plla/pll_27.v"
+    add_file -type verilog "src/plla/pll_74.v"    
     add_file -type verilog "src/usb_hid_host.v"
-    add_file -type verilog "src/console60k/pll_12.v"
+    add_file -type verilog "src/plla/pll_12.v"
 } elseif {$dev eq "mega138k"} {
     set_device GW5AT-LV138PG484AC1/I0 -device_version B
-    add_file -type cst "src/m138k/m138k.cst"
-    add_file -type verilog "src/m138k/pll.v"
-    add_file -type verilog "src/m138k/pll_27.v"
-    add_file -type verilog "src/m138k/pll_74.v"
+    add_file -type cst "src/boards/mega.cst"
+    add_file -type verilog "src/pll/pll.v"
+    add_file -type verilog "src/pll/pll_27.v"
+    add_file -type verilog "src/pll/pll_74.v"
 } elseif {$dev eq "mega138kpro"} {
     set_device GW5AST-LV138FPG676AC1/I0 -device_version B
-    add_file -type cst "src/m138k/m138kpro.cst"
-    add_file -type verilog "src/m138k/pll.v"
-    add_file -type verilog "src/m138k/pll_27.v"
-    add_file -type verilog "src/m138k/pll_74.v"
+    add_file -type cst "src/boards/mega138kpro.cst"
+    add_file -type verilog "src/pll/pll.v"
+    add_file -type verilog "src/pll/pll_27.v"
+    add_file -type verilog "src/pll/pll_74.v"
 } else {
     error "Unknown device $dev"
 }
@@ -143,7 +147,6 @@ set_option -use_mspi_as_gpio 1
 set_option -use_cpu_as_gpio 1
 
 # use the slower but timing-optimized place algorithm
-set_option -place_option 3
-# set_option -place_option 2
+set_option -place_option 2
 
 run all
