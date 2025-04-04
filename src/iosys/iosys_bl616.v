@@ -97,10 +97,10 @@ localparam RECV_RESPONSE_ACK = 3; // waiting for response ack
 reg [2:0] recv_state;
 
 // UART command buffer
-reg [7:0] cmd_reg;
-reg [31:0] data_reg;
+reg [3:0] cmd_reg;
+reg [23:0] data_reg;
 reg [23:0] rom_remain;
-reg [3:0] data_cnt;
+reg [2:0] data_cnt;
 
 // Add new registers for textdisp interface
 reg [7:0] x_wr;
@@ -155,8 +155,9 @@ always @(posedge clk) begin
         we <= 0;
 
         case (recv_state)
-            RECV_IDLE: if (rx_valid) begin
-                cmd_reg <= rx_data;
+            // Commands 1-15
+            RECV_IDLE: if (rx_valid && rx_data <= 15) begin
+                cmd_reg <= rx_data[3:0];
                 if (rx_data == 1 || rx_data == 2)
                     recv_state <= RECV_RESPONSE_REQ;
                 else if (rx_data <= 9)
