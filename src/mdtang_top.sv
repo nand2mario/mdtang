@@ -42,10 +42,14 @@ module mdtang_top (
     output ds2_cs,
 
     // USB1 and USB2
+`ifdef USB1
     inout usb1_dp,
     inout usb1_dn,
+`endif
+`ifdef USB2
     inout usb2_dp,
     inout usb2_dn,
+`endif
 
     // SDRAM
     output O_sdram_clk,
@@ -267,8 +271,8 @@ usb_hid_host usb_hid_host (
     .usb_dm(usb1_dn), .usb_dp(usb1_dp),
     .game_snes(joy_usb1), .typ(usb_type), .conerr(usb_conerr)
 );
-`else
 assign led = ~{joy_usb1[4:0], usb_type, usb_conerr};
+`else
 assign joy_usb1 = 12'b0;
 `endif
 
